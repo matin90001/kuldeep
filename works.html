@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Works — Kuldeep Rohilla</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e0e;
+      --text: #ffffff;
+      --muted: #888888;
+      --line: rgba(255,255,255,0.1);
+      --font: 'Barlow', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CUSTOM CURSOR ── */
+    .cursor-dot {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: difference;
+      transition: transform 0.1s ease;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: 56px;
+      background: rgba(14,14,14,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .logo {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+
+    nav { display: flex; gap: 36px; }
+
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    nav a:hover, nav a.active { opacity: 1; }
+
+    .header-right {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      color: var(--text);
+      opacity: 0.7;
+      display: flex;
+      gap: 16px;
+    }
+
+    .mob-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      cursor: none;
+    }
+
+    /* ── MOBILE OVERLAY ── */
+    .mob-nav {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 400;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+    }
+    .mob-nav.open { display: flex; }
+    .mob-nav a {
+      font-family: var(--font);
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--text);
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .mob-nav a:hover { opacity: 1; }
+    .mob-close {
+      position: absolute;
+      top: 16px; right: 32px;
+      background: none; border: none;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      cursor: none;
+    }
+
+    /* ── MAIN ── */
+    main { padding-top: 56px; }
+
+    /* ── PAGE TITLE ── */
+    .page-header {
+      padding: 64px 32px 48px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .page-header h1 {
+      font-size: clamp(42px, 8vw, 96px);
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      line-height: 1;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    /* ── WORKS GRID ── */
+    .works-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--line);
+      padding: 0;
+    }
+
+    .work-item {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      cursor: none;
+      background: var(--bg);
+    }
+
+    .work-img-wrap {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      background: #1a1a1a;
+    }
+
+    .work-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  opacity 0.4s ease;
+      opacity: 0.85;
+    }
+
+    .work-item:hover .work-img-wrap img {
+      transform: scale(1.05);
+      opacity: 1;
+    }
+
+    .work-label {
+      padding: 16px 0 16px;
+      margin: 0 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      transition: color 0.2s;
+    }
+
+    .work-item:hover .work-label { color: var(--text); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 24px 32px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    footer p {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header { animation: fadeUp 0.5s ease both; }
+
+    .work-item {
+      animation: fadeUp 0.5s ease both;
+    }
+    .work-item:nth-child(1) { animation-delay: 0.05s; }
+    .work-item:nth-child(2) { animation-delay: 0.10s; }
+    .work-item:nth-child(3) { animation-delay: 0.15s; }
+    .work-item:nth-child(4) { animation-delay: 0.20s; }
+    .work-item:nth-child(5) { animation-delay: 0.25s; }
+    .work-item:nth-child(6) { animation-delay: 0.30s; }
+    .work-item:nth-child(7) { animation-delay: 0.35s; }
+    .work-item:nth-child(8) { animation-delay: 0.40s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .works-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 580px) {
+      body { cursor: auto; }
+      .cursor-dot { display: none; }
+      nav { display: none; }
+      .header-right { display: none; }
+      .mob-btn { display: block; }
+      .page-header { padding: 40px 20px 32px; }
+      .works-grid { grid-template-columns: repeat(2, 1fr); }
+      .work-label { margin: 0 16px; }
+      footer { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor-dot" id="cursorDot"></div>
+
+  <!-- MOBILE NAV OVERLAY -->
+  <div class="mob-nav" id="mobNav">
+    <button class="mob-close" onclick="mobClose()">Close</button>
+    <a href="index.html" onclick="mobClose()">Home</a>
+    <a href="works.html" onclick="mobClose()">Works</a>
+    <a href="#">Prints</a>
+    <a href="#">Contact</a>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <a href="index.html" class="logo">KD©</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="works.html" class="active">Works</a>
+      <a href="#">Prints</a>
+      <a href="#">Contact</a>
+    </nav>
+    <div class="header-right">IND</div>
+    <button class="mob-btn" onclick="mobOpen()">Menu</button>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <h1>Works</h1>
+    </div>
+
+    <div class="works-grid">
+
+      <a href="#" class="work-item">
+        <div class="work-img-wrap">
+          <img src="https://framerusercontent.com/images/NttmaohG1P69PNzRiBuwFbwDw0.webp?width=1100&height=1618" alt="Architectural" loading="lazy" />
+        </div>
+        <div class="work-label">Architectural</div>
+      </a>
+
+      <a href="#" class="work-item">
+        <div class="work-img-wrap">
+          <img src="https://framerusercontent.com/images/il2xuEmA8CeQHcLSG1SjZpTDys.jpg?width=1800&height=1348" alt="Automobile" loading="lazy" />
+        </div>
+        <div class="work-label">Automobile</div>
+      </a>
+
+      <a href="#" class="work-item">
+        <div class="work-img-wrap">
+          <img src="https://framerusercontent.com/images/SKwLwQq84WnB5bDrgWBresonBtw.jpg?width=2000&height=1303" alt="Food and Beverage" loading="lazy" />
+        </div>
+        <div class="work-label">Food and Beverage</div>
+      </a>
+
+      <a href="#" class="work-item">
+        <div class="work-img-wrap">
+          <img src="https://framerusercontent.com/images/gZRefHMvIF3jVM7Pv72QUN0.jpg?width=1800&height=1348" alt="Industrial" loading="lazy" />
+        </div>
+        <div class="work-label">Industrial</div>
+      </a>
+
+      <a href="#" class="work-item">
+        <div class="work-img-wrap">
+          <img src="https://framerusercontent.com/images/Xp5jx8fbA9Sxh5xJOEjhHN9wgcE.jpg?width=1333&height=1000" alt="Non-Profit" loading="lazy" />
+        </div>
+        <div class="work-label">Non-Profit</div>
+      </a>
+
+      <a href="#" class="work-item">
+        <div class="work-img-wrap">
+          <img src="https://framerusercontent.com/images/MVF4o0NaWQhCbJN7HDqJdoa8bs.webp?width=1780&height=2163" alt="People" loading="lazy" />
+        </div>
+        <div class="work-label">People</div>
+      </a>
+
+      <a href="#" class="work-item">
+        <div class="work-img-wrap">
+          <img src="https://framerusercontent.com/images/G7F5lBUTxyEcvIEObsURpkAAN4c.jpg?width=1800&height=1348" alt="Still Life" loading="lazy" />
+        </div>
+        <div class="work-label">Still Life</div>
+      </a>
+
+      <a href="#" class="work-item">
+        <div class="work-img-wrap">
+          <img src="https://framerusercontent.com/images/kk06pmsE0G6koDaA4tTfqY7aDYc.jpg?width=1400&height=1000" alt="Travel" loading="lazy" />
+        </div>
+        <div class="work-label">Travel</div>
+      </a>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>©2026</p>
+    <p>Kuldeep Rohilla — Photographer</p>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const dot = document.getElementById('cursorDot');
+    document.addEventListener('mousemove', e => {
+      dot.style.left = e.clientX + 'px';
+      dot.style.top = e.clientY + 'px';
+    });
+
+    // Mobile menu
+    function mobOpen() {
+      document.getElementById('mobNav').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function mobClose() {
+      document.getElementById('mobNav').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  </script>
+</body>
+</html>
