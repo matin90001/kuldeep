@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prints — Kuldeep Rohilla</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e0e;
+      --text: #ffffff;
+      --muted: #888888;
+      --line: rgba(255,255,255,0.12);
+      --font: 'Barlow', sans-serif;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    .cursor-dot {
+      position: fixed; width: 8px; height: 8px;
+      background: #fff; border-radius: 50%;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      mix-blend-mode: difference;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 56px;
+      background: rgba(14,14,14,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    .logo { font-size: 14px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: 0.04em; }
+    nav { display: flex; gap: 36px; }
+    nav a { color: var(--text); text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; transition: opacity 0.2s; }
+    nav a:hover, nav a.active { opacity: 1; }
+    .header-right { font-size: 13px; font-weight: 500; letter-spacing: 0.1em; color: var(--text); opacity: 0.7; }
+    .mob-btn { display: none; background: none; border: none; color: var(--text); font-family: var(--font); font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; cursor: none; }
+    .mob-nav { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 400; flex-direction: column; align-items: center; justify-content: center; gap: 40px; }
+    .mob-nav.open { display: flex; }
+    .mob-nav a { font-size: 36px; font-weight: 700; text-transform: uppercase; text-decoration: none; color: var(--text); opacity: 0.8; transition: opacity 0.2s; }
+    .mob-nav a:hover { opacity: 1; }
+    .mob-close { position: absolute; top: 16px; right: 32px; background: none; border: none; color: var(--text); font-family: var(--font); font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; cursor: none; }
+
+    main { padding-top: 56px; }
+
+    /* ══════════════════════════════
+       SHOP VIEW
+    ══════════════════════════════ */
+    #shop-view { display: block; }
+    #detail-view { display: none; }
+
+    .shop-header {
+      padding: 60px 32px 40px;
+      border-bottom: 1px solid var(--line);
+    }
+    .shop-header h1 {
+      font-size: clamp(52px, 8vw, 104px);
+      font-weight: 800; letter-spacing: -0.02em;
+      line-height: 1; text-transform: uppercase;
+    }
+    .shop-header p {
+      margin-top: 16px;
+      font-size: 14px; color: var(--muted);
+      font-weight: 400; letter-spacing: 0.02em;
+      max-width: 480px; line-height: 1.6;
+    }
+
+    /* Grid */
+    .prints-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      column-gap: 16px;
+      row-gap: 62px;
+      padding: 0 32px 32px;
+    }
+
+    .print-card {
+      cursor: none;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .print-card-img {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 4/5;
+    }
+    .print-card-img img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+      transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.4s;
+      opacity: 0.9;
+    }
+    .print-card:hover .print-card-img img { transform: scale(1.04); opacity: 1; }
+
+    .print-card-info {
+      padding: 20px 24px 24px;
+      border-top: 1px solid var(--line);
+    }
+    .print-card-type {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 6px;
+    }
+    .print-card-title {
+      font-size: 16px; font-weight: 700;
+      letter-spacing: 0.01em; line-height: 1.2;
+      color: var(--text); margin-bottom: 10px;
+    }
+    .print-card-price {
+      font-size: 14px; font-weight: 500;
+      color: var(--muted); letter-spacing: 0.04em;
+    }
+
+    /* hover overlay CTA */
+    .print-card-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 20px 24px;
+      background: linear-gradient(to top, rgba(14,14,14,0.9) 0%, transparent 100%);
+      opacity: 0; transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .print-card:hover .print-card-overlay { opacity: 1; }
+    .print-card-overlay span {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text); border-bottom: 1px solid rgba(255,255,255,0.4);
+      padding-bottom: 2px;
+    }
+
+    /* ══════════════════════════════
+       DETAIL VIEW
+    ══════════════════════════════ */
+    .detail-back {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 24px 32px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted); cursor: none;
+      border: none; background: none;
+      transition: color 0.2s;
+      border-bottom: 1px solid var(--line);
+      width: 100%;
+    }
+    .detail-back:hover { color: var(--text); }
+    .detail-back::before { content: '←'; font-size: 14px; }
+
+    .detail-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 56px - 65px);
+    }
+
+    /* LEFT — images */
+    .detail-images {
+      border-right: 1px solid var(--line);
+      padding: 0;
+    }
+    .detail-main-img {
+      aspect-ratio: 4/5;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+    .detail-main-img img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .detail-thumb-row {
+      display: flex;
+    }
+    .detail-thumb {
+      flex: 1;
+      aspect-ratio: 1;
+      overflow: hidden;
+      cursor: none;
+      border-right: 1px solid var(--line);
+      opacity: 0.5; transition: opacity 0.2s;
+    }
+    .detail-thumb:last-child { border-right: none; }
+    .detail-thumb.active, .detail-thumb:hover { opacity: 1; }
+    .detail-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* RIGHT — info */
+    .detail-info {
+      padding: 48px 48px 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .detail-breadcrumb {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 24px;
+    }
+    .detail-breadcrumb span { color: var(--text); }
+
+    .detail-title {
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 800; letter-spacing: -0.01em;
+      line-height: 1.05; text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .detail-price {
+      font-size: 20px; font-weight: 500;
+      color: var(--muted); letter-spacing: 0.04em;
+      margin-bottom: 36px;
+    }
+
+    /* Size selector */
+    .size-label {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 12px;
+    }
+    .size-options {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+    .size-btn {
+      padding: 10px 20px;
+      border: 1px solid var(--line);
+      background: none; color: var(--text);
+      font-family: var(--font);
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: none; transition: all 0.2s;
+    }
+    .size-btn:hover { border-color: rgba(255,255,255,0.5); }
+    .size-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+    /* Add to cart */
+    .add-to-cart {
+      width: 100%;
+      padding: 18px;
+      background: var(--text); color: var(--bg);
+      border: none; font-family: var(--font);
+      font-size: 13px; font-weight: 800;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      cursor: none; transition: opacity 0.2s;
+      margin-bottom: 36px;
+    }
+    .add-to-cart:hover { opacity: 0.85; }
+
+    /* Divider */
+    .detail-divider {
+      width: 100%; height: 1px;
+      background: var(--line); margin-bottom: 28px;
+    }
+
+    /* Description */
+    .detail-desc {
+      font-size: 14px; color: var(--muted);
+      line-height: 1.7; font-weight: 400;
+      margin-bottom: 28px;
+    }
+    .detail-desc em { color: var(--text); font-style: italic; }
+
+    /* Specs */
+    .detail-specs {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .spec-row {
+      display: flex; align-items: baseline;
+      gap: 16px;
+    }
+    .spec-key {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); min-width: 120px;
+    }
+    .spec-val {
+      font-size: 13px; font-weight: 500;
+      color: var(--text); letter-spacing: 0.02em;
+    }
+
+    /* ── YOU MAY ALSO LIKE ── */
+    .also-like {
+      border-top: 1px solid var(--line);
+      padding: 64px 32px;
+    }
+    .also-like h3 {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 36px;
+    }
+    .also-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .also-card { cursor: none; }
+    .also-img {
+      aspect-ratio: 4/5; overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .also-img img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+      transition: transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94);
+      opacity: 0.85;
+    }
+    .also-card:hover .also-img img { transform: scale(1.04); opacity: 1; }
+    .also-name {
+      font-size: 13px; font-weight: 700;
+      color: var(--text); letter-spacing: 0.02em;
+      margin-bottom: 4px;
+    }
+    .also-price {
+      font-size: 12px; color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 24px 32px;
+      border-top: 1px solid var(--line);
+    }
+    footer p { font-size: 12px; color: var(--muted); letter-spacing: 0.08em; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .also-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .prints-grid { grid-template-columns: repeat(2, 1fr); }
+      .detail-body { grid-template-columns: 1fr; }
+      .detail-images { border-right: none; border-bottom: 1px solid var(--line); }
+      .detail-info { padding: 32px 20px 48px; }
+      .also-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 580px) {
+      body { cursor: auto; }
+      .cursor-dot { display: none; }
+      nav, .header-right { display: none; }
+      .mob-btn { display: block; }
+      .shop-header { padding: 36px 20px 28px; }
+      .prints-grid { grid-template-columns: 1fr 1fr; }
+      .print-card-info { padding: 14px 16px 18px; }
+      .detail-back { padding: 16px 20px; }
+      .also-like { padding: 40px 20px; }
+      footer { padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor-dot" id="cursorDot"></div>
+
+  <div class="mob-nav" id="mobNav">
+    <button class="mob-close" onclick="mobClose()">Close</button>
+    <a href="index.html" onclick="mobClose()">Home</a>
+    <a href="works.html" onclick="mobClose()">Works</a>
+    <a href="prints.html" onclick="mobClose()">Prints</a>
+    <a href="contact.html" onclick="mobClose()">Contact</a>
+  </div>
+
+  <header>
+    <a href="index.html" class="logo">KD©</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="works.html">Works</a>
+      <a href="prints.html" class="active">Prints</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-right">IND</div>
+    <button class="mob-btn" onclick="mobOpen()">Menu</button>
+  </header>
+
+  <main>
+
+    <!-- ══ SHOP VIEW ══ -->
+    <div id="shop-view">
+
+      <div class="shop-header">
+        <h1>Prints</h1>
+        <p>Fine art prints from the field — open edition, archival cotton paper, ready to frame.</p>
+      </div>
+
+      <div class="prints-grid">
+
+        <div class="print-card" onclick="openDetail('Still Life No. 1','₹ 12,000','https://framerusercontent.com/images/G7F5lBUTxyEcvIEObsURpkAAN4c.jpg','Still Life')">
+          <div class="print-card-img">
+            <img src="https://framerusercontent.com/images/G7F5lBUTxyEcvIEObsURpkAAN4c.jpg" alt="Still Life No. 1" loading="lazy" />
+            <div class="print-card-overlay"><span>View Print →</span></div>
+          </div>
+          <div class="print-card-info">
+            <div class="print-card-type">Print</div>
+            <div class="print-card-title">Still Life No. 1</div>
+            <div class="print-card-price">₹ 12,000</div>
+          </div>
+        </div>
+
+        <div class="print-card" onclick="openDetail('Architectural Study','₹ 12,000','https://framerusercontent.com/images/NttmaohG1P69PNzRiBuwFbwDw0.webp','Architectural')">
+          <div class="print-card-img">
+            <img src="https://framerusercontent.com/images/NttmaohG1P69PNzRiBuwFbwDw0.webp" alt="Architectural Study" loading="lazy" />
+            <div class="print-card-overlay"><span>View Print →</span></div>
+          </div>
+          <div class="print-card-info">
+            <div class="print-card-type">Print</div>
+            <div class="print-card-title">Architectural Study</div>
+            <div class="print-card-price">₹ 12,000</div>
+          </div>
+        </div>
+
+        <div class="print-card" onclick="openDetail('People I','₹ 12,000','https://framerusercontent.com/images/MVF4o0NaWQhCbJN7HDqJdoa8bs.webp','People')">
+          <div class="print-card-img">
+            <img src="https://framerusercontent.com/images/MVF4o0NaWQhCbJN7HDqJdoa8bs.webp" alt="People I" loading="lazy" />
+            <div class="print-card-overlay"><span>View Print →</span></div>
+          </div>
+          <div class="print-card-info">
+            <div class="print-card-type">Print</div>
+            <div class="print-card-title">People I</div>
+            <div class="print-card-price">₹ 12,000</div>
+          </div>
+        </div>
+
+        <div class="print-card" onclick="openDetail('Travel No. 1','₹ 12,000','https://framerusercontent.com/images/kk06pmsE0G6koDaA4tTfqY7aDYc.jpg','Travel')">
+          <div class="print-card-img">
+            <img src="https://framerusercontent.com/images/kk06pmsE0G6koDaA4tTfqY7aDYc.jpg" alt="Travel No. 1" loading="lazy" />
+            <div class="print-card-overlay"><span>View Print →</span></div>
+          </div>
+          <div class="print-card-info">
+            <div class="print-card-type">Print</div>
+            <div class="print-card-title">Travel No. 1</div>
+            <div class="print-card-price">₹ 12,000</div>
+          </div>
+        </div>
+
+        <div class="print-card" onclick="openDetail('Industrial I','₹ 12,000','https://framerusercontent.com/images/gZRefHMvIF3jVM7Pv72QUN0.jpg','Industrial')">
+          <div class="print-card-img">
+            <img src="https://framerusercontent.com/images/gZRefHMvIF3jVM7Pv72QUN0.jpg" alt="Industrial I" loading="lazy" />
+            <div class="print-card-overlay"><span>View Print →</span></div>
+          </div>
+          <div class="print-card-info">
+            <div class="print-card-type">Print</div>
+            <div class="print-card-title">Industrial I</div>
+            <div class="print-card-price">₹ 12,000</div>
+          </div>
+        </div>
+
+        <div class="print-card" onclick="openDetail('Non-Profit I','₹ 12,000','https://framerusercontent.com/images/Xp5jx8fbA9Sxh5xJOEjhHN9wgcE.jpg','Non-Profit')">
+          <div class="print-card-img">
+            <img src="https://framerusercontent.com/images/Xp5jx8fbA9Sxh5xJOEjhHN9wgcE.jpg" alt="Non-Profit I" loading="lazy" />
+            <div class="print-card-overlay"><span>View Print →</span></div>
+          </div>
+          <div class="print-card-info">
+            <div class="print-card-type">Print</div>
+            <div class="print-card-title">Non-Profit I</div>
+            <div class="print-card-price">₹ 12,000</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /shop-view -->
+
+
+    <!-- ══ DETAIL VIEW ══ -->
+    <div id="detail-view">
+
+      <button class="detail-back" onclick="closeDetail()">Back to Prints</button>
+
+      <div class="detail-body">
+
+        <!-- LEFT: images -->
+        <div class="detail-images">
+          <div class="detail-main-img">
+            <img id="detail-main-img" src="" alt="" />
+          </div>
+          <div class="detail-thumb-row">
+            <div class="detail-thumb active" onclick="swapImg(this)" data-src="">
+              <img id="thumb-0" src="" alt="" />
+            </div>
+            <div class="detail-thumb" onclick="swapImg(this)" data-src="https://framerusercontent.com/images/G7F5lBUTxyEcvIEObsURpkAAN4c.jpg">
+              <img src="https://framerusercontent.com/images/G7F5lBUTxyEcvIEObsURpkAAN4c.jpg" alt="" />
+            </div>
+            <div class="detail-thumb" onclick="swapImg(this)" data-src="https://framerusercontent.com/images/kk06pmsE0G6koDaA4tTfqY7aDYc.jpg">
+              <img src="https://framerusercontent.com/images/kk06pmsE0G6koDaA4tTfqY7aDYc.jpg" alt="" />
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: info -->
+        <div class="detail-info">
+
+          <div class="detail-breadcrumb">Prints / <span id="detail-category"></span></div>
+
+          <div class="detail-title" id="detail-title"></div>
+          <div class="detail-price" id="detail-price"></div>
+
+          <div class="size-label">Size</div>
+          <div class="size-options">
+            <button class="size-btn active" onclick="selectSize(this)">12in × 12in</button>
+            <button class="size-btn" onclick="selectSize(this)">16in × 16in</button>
+            <button class="size-btn" onclick="selectSize(this)">20in × 20in</button>
+            <button class="size-btn" onclick="selectSize(this)">24in × 24in</button>
+          </div>
+
+          <button class="add-to-cart" onclick="addedToCart(this)">Add to Cart</button>
+
+          <div class="detail-divider"></div>
+
+          <p class="detail-desc">
+            Open edition, unframed print on archival cotton paper.
+            Shot on medium format film — each print carries the grain and depth of analogue photography.
+            Printed to order, ships within 7–10 business days.
+          </p>
+
+          <div class="detail-specs">
+            <div class="spec-row">
+              <span class="spec-key">Paper</span>
+              <span class="spec-val">Hahnemühle Photo Rag 310gsm</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Edition</span>
+              <span class="spec-val">Open Edition</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Finish</span>
+              <span class="spec-val">Matte, Unframed</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-key">Film</span>
+              <span class="spec-val">Medium Format, 120mm</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- YOU MAY ALSO LIKE -->
+      <div class="also-like">
+        <h3>You may also like</h3>
+        <div class="also-grid">
+          <div class="also-card" onclick="openDetail('Still Life No. 1','₹ 12,000','https://framerusercontent.com/images/G7F5lBUTxyEcvIEObsURpkAAN4c.jpg','Still Life')">
+            <div class="also-img"><img src="https://framerusercontent.com/images/G7F5lBUTxyEcvIEObsURpkAAN4c.jpg" alt="" loading="lazy" /></div>
+            <div class="also-name">Still Life No. 1</div>
+            <div class="also-price">₹ 12,000</div>
+          </div>
+          <div class="also-card" onclick="openDetail('Architectural Study','₹ 12,000','https://framerusercontent.com/images/NttmaohG1P69PNzRiBuwFbwDw0.webp','Architectural')">
+            <div class="also-img"><img src="https://framerusercontent.com/images/NttmaohG1P69PNzRiBuwFbwDw0.webp" alt="" loading="lazy" /></div>
+            <div class="also-name">Architectural Study</div>
+            <div class="also-price">₹ 12,000</div>
+          </div>
+          <div class="also-card" onclick="openDetail('Travel No. 1','₹ 12,000','https://framerusercontent.com/images/kk06pmsE0G6koDaA4tTfqY7aDYc.jpg','Travel')">
+            <div class="also-img"><img src="https://framerusercontent.com/images/kk06pmsE0G6koDaA4tTfqY7aDYc.jpg" alt="" loading="lazy" /></div>
+            <div class="also-name">Travel No. 1</div>
+            <div class="also-price">₹ 12,000</div>
+          </div>
+          <div class="also-card" onclick="openDetail('People I','₹ 12,000','https://framerusercontent.com/images/MVF4o0NaWQhCbJN7HDqJdoa8bs.webp','People')">
+            <div class="also-img"><img src="https://framerusercontent.com/images/MVF4o0NaWQhCbJN7HDqJdoa8bs.webp" alt="" loading="lazy" /></div>
+            <div class="also-name">People I</div>
+            <div class="also-price">₹ 12,000</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /detail-view -->
+
+  </main>
+
+  <footer>
+    <p>©2026</p>
+  </footer>
+
+  <script>
+    // Cursor
+    const dot = document.getElementById('cursorDot');
+    document.addEventListener('mousemove', e => {
+      dot.style.left = e.clientX + 'px';
+      dot.style.top  = e.clientY + 'px';
+    });
+
+    // Mobile menu
+    function mobOpen()  { document.getElementById('mobNav').classList.add('open');    document.body.style.overflow = 'hidden'; }
+    function mobClose() { document.getElementById('mobNav').classList.remove('open'); document.body.style.overflow = ''; }
+
+    // Shop → Detail
+    function openDetail(title, price, imgSrc, category) {
+      document.getElementById('detail-title').textContent = title;
+      document.getElementById('detail-price').textContent = price;
+      document.getElementById('detail-category').textContent = category;
+
+      const mainImg = document.getElementById('detail-main-img');
+      mainImg.src = imgSrc;
+      mainImg.alt = title;
+
+      const thumb0 = document.getElementById('thumb-0');
+      thumb0.src = imgSrc;
+      thumb0.alt = title;
+      thumb0.closest('.detail-thumb').dataset.src = imgSrc;
+
+      // Reset thumbs
+      document.querySelectorAll('.detail-thumb').forEach((t,i) => {
+        t.classList.toggle('active', i === 0);
+      });
+
+      // Reset size
+      document.querySelectorAll('.size-btn').forEach((b,i) => {
+        b.classList.toggle('active', i === 0);
+      });
+
+      document.getElementById('shop-view').style.display = 'none';
+      document.getElementById('detail-view').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closeDetail() {
+      document.getElementById('detail-view').style.display = 'none';
+      document.getElementById('shop-view').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Swap main image from thumbnail
+    function swapImg(thumb) {
+      document.querySelectorAll('.detail-thumb').forEach(t => t.classList.remove('active'));
+      thumb.classList.add('active');
+      document.getElementById('detail-main-img').src = thumb.dataset.src;
+    }
+
+    // Size selector
+    function selectSize(btn) {
+      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // Add to cart feedback
+    function addedToCart(btn) {
+      const orig = btn.textContent;
+      btn.textContent = 'Added ✓';
+      btn.style.opacity = '0.7';
+      setTimeout(() => { btn.textContent = orig; btn.style.opacity = ''; }, 2000);
+    }
+  </script>
+</body>
+</html>
